@@ -18,7 +18,7 @@ const Profile = () => {
     try {
       const res = await fetch('/api/orders/myorders', {
         headers: {
-          Authorization: 'Bearer ${user.token}'
+          Authorization:`Bearer ${user.token}`
         }
       });
 
