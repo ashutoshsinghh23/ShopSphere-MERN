@@ -8,15 +8,23 @@ const Home = () => {
   useEffect(() => {
     const fetchProducts = async () => {
       try {
-        const res = await fetch('/api/products');
+        const res = await fetch(
+          `${process.env.REACT_APP_API_URL}/products`
+        );
+
+        if (!res.ok) {
+          throw new Error('Failed to fetch products');
+        }
+
         const data = await res.json();
         setProducts(data.slice(0, 4)); // Featured products
       } catch (error) {
-        console.error(error);
+        console.error('Error fetching products:', error);
       } finally {
         setLoading(false);
       }
     };
+
     fetchProducts();
   }, []);
 
@@ -26,7 +34,9 @@ const Home = () => {
         <h1>Welcome to ShopSphere</h1>
         <p>Discover the best products at unbeatable prices.</p>
       </div>
+
       <h2>Featured Products</h2>
+
       {loading ? (
         <div>Loading...</div>
       ) : (

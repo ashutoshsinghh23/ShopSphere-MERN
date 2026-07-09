@@ -1,50 +1,95 @@
-import React, { useEffect, useState } from 'react';
-import ProductCard from '../components/ProductCard';
-import '../styles/product.css';
+import React, { useState, useContext } from 'react';
+import { useNavigate, Link } from 'react-router-dom';
+import { AuthContext } from '../context/AuthContext';
+import '../styles/auth.css';
 
-const Shop = () => {
-  const [products, setProducts] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [search, setSearch] = useState('');
+const Register = () => {
+  const [name, setName] = useState('');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
 
-  useEffect(() => {
-    const fetchProducts = async () => {
-      try {
-        const res = await fetch('/api/products');
-        const data = await res.json();
-        setProducts(data);
-      } catch (error) {
-        console.error(error);
-      } finally {
-        setLoading(false);
+  const { login } = useContext(AuthContext);
+  const navigate = useNavigate();
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+
+    try {
+      const res = await fetch(
+        `${process.env.REACT_APP_API_URL}/auth/register`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            name,
+            email,
+            password,
+          }),
+        }
+      );
+
+      const data = await res.json();
+
+      if (res.ok) {
+        alert(
+          'Registration Successful! Please check your email for the Welcome OTP.'
+        );
+
+        login(data);
+        navigate('/');
+      } else {
+        alert(data.message || 'Registration failed');
       }
-    };
-    fetchProducts();
-  }, []);
 
-  const filteredProducts = products.filter(p => p.name.toLowerCase().includes(search.toLowerCase()));
+    } catch (error) {
+      console.error('Registration Error:', error);
+      alert('Something went wrong. Please try again.');
+    }
+  };
 
   return (
-    <div className="shop-container">
-      <h2>All Products</h2>
-      <input 
-        type="text" 
-        placeholder="Search products..." 
-        value={search}
-        onChange={(e) => setSearch(e.target.value)}
-        className="search-bar"
-      />
-      {loading ? (
-        <div>Loading...</div>
-      ) : (
-        <div className="product-grid">
-          {filteredProducts.map((product) => (
-            <ProductCard key={product._id} product={product} />
-          ))}
-        </div>
-      )}
+    <div className="auth-container">
+      <form onSubmit={handleSubmit} className="auth-form">
+
+        <h2>Register</h2>
+
+        <input
+          type="text"
+          placeholder="Full Name"
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+          required
+        />
+
+        <input
+          type="email"
+          placeholder="Email"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          required
+        />
+
+        <input
+          type="password"
+          placeholder="Password"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+          required
+        />
+
+        <button type="submit" className="btn">
+          Register
+        </button>
+
+        <p>
+          Already have an account? <Link to="/login">Login</Link>
+        </p>
+
+      </form>
     </div>
   );
 };
 
-export default Shop;
+export default Register;
